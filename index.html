@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#eef5f8">
+  <meta name="description" content="集中と休憩を、自分に合うリズムへ整えるオフライン対応ポモドーロタイマー。">
+  <meta name="color-scheme" content="light dark">
+  <title>PomoNote</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">本文へ移動</a>
+
+  <div class="app-shell">
+    <header class="app-header" id="appHeader">
+      <button class="icon-button header-back hidden" id="headerBack" type="button" aria-label="ホームへ戻る">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <div>
+          <h1 id="headerTitle">PomoNote</h1>
+        </div>
+      </div>
+      <time class="header-datetime" id="headerDateTime"></time>
+    </header>
+
+    <div class="offline-banner hidden" id="offlineBanner" role="status">オフラインです。記録はこの端末に保存されます。</div>
+
+    <main id="mainContent">
+      <section class="page active" id="homePage" data-page="home" aria-label="ホーム">
+        <article class="start-card surface-accent">
+          <div class="start-card-copy">
+            <h3 id="homeConfigTitle">25分活動 <span>・</span> 5分休憩</h3>
+          </div>
+          <div class="mini-cycle" id="homeCycle" aria-hidden="true"></div>
+          <button class="primary-button full-width" id="openTimerSetup" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 7 8 5-8 5V7Z"/></svg>
+            条件を確認して始める
+          </button>
+        </article>
+
+        <section class="recommendation-card" aria-label="おすすめ設定">
+          <div id="homeRecommendation"></div>
+        </section>
+
+        <section aria-labelledby="todaySummaryHeading">
+          <div class="section-heading-row compact">
+            <h3 id="todaySummaryHeading">今日の記録</h3>
+          </div>
+          <div class="metric-grid two-columns">
+            <article class="metric-card">
+              <span class="metric-icon sage" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
+              </span>
+              <p>本日の活動時間</p>
+              <strong id="todayFocus">0分</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-icon amber" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+              </span>
+              <p>総日数</p>
+              <strong id="homeTotalDays">0日</strong>
+            </article>
+          </div>
+        </section>
+
+      </section>
+
+      <section class="page" id="dashboardPage" data-page="dashboard" aria-labelledby="dashboardHeading">
+        <div class="page-heading">
+          <h2 id="dashboardHeading">記録</h2>
+        </div>
+
+        <div class="metric-grid dashboard-metrics">
+          <article class="metric-card wide"><p>連続日数</p><strong id="statStreak">0日</strong></article>
+          <article class="metric-card"><p>今週の総活動時間</p><strong id="statWeekFocus">0分</strong></article>
+          <article class="metric-card"><p>今週の総セッション時間</p><strong id="statWeekElapsed">0分</strong></article>
+          <article class="metric-card"><p>総日数</p><strong id="statDays">0日</strong></article>
+          <article class="metric-card"><p>生涯総活動時間</p><strong id="statLifetimeFocus">0分</strong></article>
+        </div>
+
+        <section class="surface chart-card" aria-label="週別グラフ">
+          <div class="chart-mode-switch" aria-label="グラフの種類">
+            <button class="active" type="button" data-weekly-mode="focus" aria-pressed="true">日別活動時間</button>
+            <button type="button" data-weekly-mode="elapsed" aria-pressed="false">日別総セッション時間</button>
+          </div>
+          <div class="week-navigation">
+            <button type="button" id="previousWeek" aria-label="前の週を見る">&lt;</button>
+            <span id="weeklyRange"></span>
+            <button type="button" id="nextWeek" aria-label="次の週を見る">&gt;</button>
+          </div>
+          <div class="bar-chart" id="weeklyChart" role="img" aria-label="過去7日間の活動時間"></div>
+        </section>
+
+        <section aria-labelledby="recordsHeading">
+          <div class="section-heading-row">
+            <div>
+              <h3 id="recordsHeading">記録一覧</h3>
+            </div>
+          </div>
+          <div class="record-list" id="recordList"></div>
+        </section>
+      </section>
+
+      <section class="page" id="badgesPage" data-page="badges" aria-labelledby="badgesHeading">
+        <div class="page-heading">
+          <h2 id="badgesHeading">バッジ</h2>
+        </div>
+        <div class="badge-summary surface-accent">
+          <div><span id="earnedBadgeCount">0</span><small>獲得済み</small></div>
+          <div class="badge-progress-track"><span id="badgeProgress"></span></div>
+        </div>
+        <div class="badge-grid" id="badgeGrid"></div>
+      </section>
+
+      <section class="page" id="settingsPage" data-page="settings" aria-labelledby="settingsHeading">
+        <div class="page-heading">
+          <h2 id="settingsHeading">設定</h2>
+        </div>
+
+        <section class="settings-group surface" aria-labelledby="appearanceHeading">
+          <div class="settings-title"><span class="metric-icon sage" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.5-.4-.9-.9-.8a5 5 0 0 1-5.3-6.3c.2-.7-.5-1.2-1.1-1.5A9 9 0 0 0 12 3Z"/></svg></span><div><h3 id="appearanceHeading">カラーモード</h3></div></div>
+          <select id="colorMode" aria-labelledby="appearanceHeading">
+            <option value="system">端末の設定に合わせる</option>
+            <option value="light">ライト</option>
+            <option value="dark">ダーク</option>
+          </select>
+        </section>
+
+        <section class="settings-group surface" aria-labelledby="alertHeading">
+          <div class="settings-title"><span class="metric-icon amber" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></span><div><h3 id="alertHeading">音と通知</h3></div></div>
+          <label class="toggle-row"><span><strong>終了音</strong></span><input id="soundEnabled" type="checkbox"><span class="toggle" aria-hidden="true"></span></label>
+          <label class="field-label" for="soundType">通知音</label>
+          <select id="soundType">
+            <option value="quiet">静か</option>
+            <option value="drop">しずく</option>
+            <option value="chime">チャイム</option>
+            <option value="bell">ベル</option>
+            <option value="wood">ウッド</option>
+            <option value="digital">デジタル</option>
+            <option value="timer">タイマー</option>
+            <option value="double">ダブルベル</option>
+            <option value="high">高音アラーム</option>
+            <option value="alarm">アラーム</option>
+          </select>
+          <label class="toggle-row"><span><strong>停止するまで鳴らす</strong><small>最大1分間</small></span><input id="repeatSound" type="checkbox"><span class="toggle" aria-hidden="true"></span></label>
+          <label class="range-row" for="soundVolume"><span>音量</span><input id="soundVolume" type="range" min="0" max="100" step="10"><output id="volumeOutput">70%</output></label>
+          <div class="inline-actions">
+            <button class="secondary-button" id="testSound" type="button">音を試す</button>
+            <button class="secondary-button" id="requestNotifications" type="button">通知を許可</button>
+          </div>
+        </section>
+
+        <section class="settings-group surface" aria-labelledby="screenHeading">
+          <div class="settings-title"><span class="metric-icon blue" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></span><div><h3 id="screenHeading">タイマー画面</h3><p>対応端末のみ利用できます</p></div></div>
+          <label class="toggle-row"><span><strong>タイマー画面を点灯したままにする</strong></span><input id="wakeLockEnabled" type="checkbox"><span class="toggle" aria-hidden="true"></span></label>
+        </section>
+
+        <section class="settings-group surface" aria-labelledby="backupHeading">
+          <div class="settings-title"><span class="metric-icon violet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6h14v-6"/></svg></span><div><h3 id="backupHeading">バックアップ</h3></div></div>
+          <div class="stacked-actions">
+            <button class="secondary-button justify-between" id="exportJson" type="button"><span>エクスポート</span><span aria-hidden="true">↓</span></button>
+            <button class="secondary-button justify-between" id="importJsonButton" type="button"><span>インポート</span><span aria-hidden="true">↑</span></button>
+            <input class="visually-hidden" id="importJsonInput" type="file" accept="application/json,.json">
+          </div>
+        </section>
+
+      </section>
+
+      <section class="page timer-page" id="timerPage" data-page="timer" aria-label="タイマー">
+        <div class="timer-stepper" aria-label="タイマーの進行状況">
+          <span class="active" data-step="setup">設定</span><i></i><span data-step="focus">活動</span><i></i><span data-step="break">休憩</span><i></i><span data-step="review">記録</span>
+        </div>
+
+        <section class="timer-screen active" id="setupScreen" data-timer-screen="setup" aria-label="タイマー設定">
+          <form id="timerForm">
+            <div class="timer-form-card">
+              <div class="duration-grid">
+                <label><span>活動</span><span class="number-field"><input id="focusMinutes" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off"><small>分</small></span></label>
+                <label><span>休憩</span><span class="number-field"><input id="breakMinutes" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off"><small>分</small></span></label>
+                <label><span>セット数</span><span class="number-field"><input id="setCount" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off"><small>回</small></span></label>
+              </div>
+
+              <div class="schedule-preview" aria-live="polite">
+                <div><span>合計活動</span><strong id="previewFocus">1時間40分</strong></div>
+                <div><span>合計休憩</span><strong id="previewBreak">15分</strong></div>
+                <div><span>総計</span><strong id="previewTotal">1時間55分</strong></div>
+              </div>
+            </div>
+
+            <section class="setup-recommendation" aria-label="おすすめ設定">
+              <div id="setupRecommendation"></div>
+            </section>
+
+            <section aria-labelledby="themeHeading">
+              <div class="section-heading-row compact"><h3 id="themeHeading">テーマ設定</h3></div>
+              <div class="theme-picker" role="radiogroup" aria-label="テーマ設定">
+                <label class="theme-option forest"><input type="radio" name="timerTheme" value="forest"><span class="theme-preview"><i></i><b></b></span><span>Sky</span></label>
+                <label class="theme-option ocean"><input type="radio" name="timerTheme" value="ocean"><span class="theme-preview"><i></i><b></b></span><span>Ocean</span></label>
+                <label class="theme-option dusk"><input type="radio" name="timerTheme" value="dusk"><span class="theme-preview"><i></i><b></b></span><span>Dusk</span></label>
+                <label class="theme-option mono"><input type="radio" name="timerTheme" value="mono"><span class="theme-preview"><i></i><b></b></span><span>Mono</span></label>
+              </div>
+            </section>
+
+            <button class="primary-button large full-width" type="submit">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 7 8 5-8 5V7Z"/></svg>
+              スタート
+            </button>
+          </form>
+        </section>
+
+        <section class="timer-screen running-screen" id="focusScreen" data-timer-screen="focus" aria-labelledby="focusScreenHeading">
+          <h2 id="focusScreenHeading">活動</h2>
+          <div class="timer-ring" id="focusRing" role="timer" aria-live="off" aria-label="活動の残り時間">
+            <div class="timer-ring-inner">
+              <strong id="focusTimeDisplay">25:00</strong>
+              <span id="focusSetDisplay">1 / 4</span>
+            </div>
+          </div>
+          <div class="timer-controls">
+            <button class="round-control secondary" type="button" data-timer-action="interrupt"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1"/></svg><span>中断</span></button>
+            <button class="round-control primary" type="button" data-timer-action="pause"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 7v10M15 7v10"/></svg><span>一時停止</span></button>
+            <button class="round-control secondary" type="button" data-timer-action="skip"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 7 8 5-8 5V7ZM17 7v10"/></svg><span>完了</span></button>
+          </div>
+          <button class="text-button centered" type="button" data-timer-action="change">次の区間から条件を変更</button>
+        </section>
+
+        <section class="timer-screen running-screen" id="breakScreen" data-timer-screen="break" aria-labelledby="breakScreenHeading">
+          <h2 id="breakScreenHeading">休憩</h2>
+          <div class="timer-ring" id="breakRing" role="timer" aria-live="off" aria-label="休憩の残り時間">
+            <div class="timer-ring-inner">
+              <strong id="breakTimeDisplay">05:00</strong>
+              <span id="breakSetDisplay">NEXT 2 / 4</span>
+            </div>
+          </div>
+          <div class="timer-controls">
+            <button class="round-control secondary" type="button" data-timer-action="interrupt"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1"/></svg><span>中断</span></button>
+            <button class="round-control primary" type="button" data-timer-action="pause"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 7v10M15 7v10"/></svg><span>一時停止</span></button>
+            <button class="round-control secondary" type="button" data-timer-action="skip"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 7 8 5-8 5V7ZM17 7v10"/></svg><span>スキップ</span></button>
+          </div>
+          <button class="text-button centered" type="button" data-timer-action="change">次の区間から条件を変更</button>
+        </section>
+
+        <section class="timer-screen" id="reviewScreen" data-timer-screen="review" aria-labelledby="reviewHeading">
+          <div class="completion-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12 4 4 8-9"/></svg></div>
+          <div class="page-heading centered-heading">
+            <h2 id="reviewHeading">お疲れ様でした！</h2>
+          </div>
+          <div class="review-summary" id="reviewSummary"></div>
+          <form id="reviewForm" class="surface review-form">
+            <fieldset>
+              <legend>今回の集中度 <span>任意</span></legend>
+              <div class="focus-rating">
+                <label><input type="radio" name="focusRating" value="1"><span>1</span><small>低い</small></label>
+                <label><input type="radio" name="focusRating" value="2"><span>2</span><small>やや低い</small></label>
+                <label><input type="radio" name="focusRating" value="3"><span>3</span><small>普通</small></label>
+                <label><input type="radio" name="focusRating" value="4"><span>4</span><small>高い</small></label>
+                <label><input type="radio" name="focusRating" value="5"><span>5</span><small>最高</small></label>
+              </div>
+            </fieldset>
+            <label class="field-label" for="sessionNote">メモ <span>任意</span></label>
+            <textarea id="sessionNote" maxlength="500" rows="2" placeholder="メモを入力"></textarea>
+            <button class="primary-button full-width" type="submit">保存</button>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" id="bottomNav" aria-label="メインメニュー">
+      <button class="active" type="button" data-nav-target="home" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m4 11 8-7 8 7v9h-6v-6h-4v6H4v-9Z"/></svg><span>ホーム</span></button>
+      <button type="button" data-nav-target="dashboard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span>記録</span></button>
+      <button type="button" data-nav-target="badges"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4v2a4 4 0 0 0 4 4M17 6h3v2a4 4 0 0 1-4 4"/></svg><span>バッジ</span></button>
+      <button type="button" data-nav-target="settings"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19 12a7 7 0 0 0-.08-1l2-1.55-2-3.46-2.45 1A7 7 0 0 0 14.74 6L14.4 3h-4.8l-.34 3a7 7 0 0 0-1.73 1L5.08 6l-2 3.46 2 1.55a7 7 0 0 0 0 2L3.08 14.55l2 3.46 2.45-1a7 7 0 0 0 1.73 1l.34 3h4.8l.34-3a7 7 0 0 0 1.73-1l2.45 1 2-3.46-2-1.55c.05-.33.08-.66.08-1Z"/></svg><span>設定</span></button>
+    </nav>
+  </div>
+
+  <dialog id="recordDialog" class="app-dialog">
+    <form method="dialog" class="dialog-card" id="recordEditForm">
+      <div class="dialog-heading"><div><h2>記録を編集</h2></div><button class="icon-button" value="cancel" aria-label="閉じる"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <input type="hidden" id="editRecordId">
+      <fieldset><legend>集中度</legend><div class="focus-rating compact-rating" id="editRating">
+        <label><input type="radio" name="editFocusRating" value="1"><span>1</span></label><label><input type="radio" name="editFocusRating" value="2"><span>2</span></label><label><input type="radio" name="editFocusRating" value="3"><span>3</span></label><label><input type="radio" name="editFocusRating" value="4"><span>4</span></label><label><input type="radio" name="editFocusRating" value="5"><span>5</span></label>
+      </div></fieldset>
+      <label class="field-label" for="editNote">メモ</label>
+      <textarea id="editNote" maxlength="500" rows="5"></textarea>
+      <div class="dialog-actions"><button class="secondary-button" value="cancel">キャンセル</button><button class="primary-button" id="saveRecordEdit" value="default">保存</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="changeDialog" class="app-dialog">
+    <form method="dialog" class="dialog-card" id="changeConfigForm">
+      <div class="dialog-heading"><div><h2>条件を変更</h2></div><button class="icon-button" value="cancel" aria-label="閉じる"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <p>現在の区間はそのまま続け、次の区間から反映します。</p>
+      <div class="duration-grid dialog-duration">
+        <label><span>活動時間</span><span class="number-field"><input id="changeFocus" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off"><small>分</small></span></label>
+        <label><span>休憩時間</span><span class="number-field"><input id="changeBreak" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off"><small>分</small></span></label>
+        <label><span>セット数</span><span class="number-field"><input id="changeSets" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off"><small>回</small></span></label>
+      </div>
+      <p class="field-error hidden" id="changeError" role="alert"></p>
+      <div class="dialog-actions"><button class="secondary-button" value="cancel">キャンセル</button><button class="primary-button" id="applyConfigChange" value="default">次の区間から反映</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="overdueDialog" class="app-dialog locked-dialog">
+    <div class="dialog-card">
+      <div class="centered-heading"><h2>終了予定を過ぎています</h2></div>
+      <div class="stacked-actions">
+        <button class="primary-button" id="overdueCompleted" type="button">完了</button>
+        <button class="secondary-button" id="overdueInterrupted" type="button">中断</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="soundAlertDialog" class="app-dialog locked-dialog">
+    <div class="dialog-card">
+      <div class="completion-mark small" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></div>
+      <div class="centered-heading"><h2 id="soundAlertHeading">時間になりました</h2></div>
+      <button class="primary-button full-width" id="stopAlertSound" type="button">停止して次へ</button>
+    </div>
+  </dialog>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

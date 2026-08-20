@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PomoNote">
+  <rect width="512" height="512" rx="120" fill="#e2edf3"/>
+  <circle cx="256" cy="270" r="155" fill="#f8fbfc" stroke="#527c99" stroke-width="20"/>
+  <path d="M256 150v120l79 48" fill="none" stroke="#315d7a" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M196 83c17-37 59-51 93-31-7 39-44 63-82 48" fill="#527c99"/>
+  <path d="M252 112c12-39 49-62 86-50 1 40-30 72-70 69" fill="#8fb1c6"/>
+  <circle cx="256" cy="270" r="19" fill="#315d7a"/>
+</svg>
